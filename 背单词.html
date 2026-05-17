@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>专属背单词记忆本 - 终极防弹满血版</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px 10px;
+        }
+
+        /* 顶部控制台 */
+        .dashboard {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 20px;
+            box-sizing: border-box;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .controls select,
+        .controls input {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        /* 按钮排版 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-act {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .btn-review {
+            background: #4a90e2;
+        }
+
+        .btn-review:hover {
+            background: #357abd;
+        }
+
+        .btn-new {
+            background: #2ecc71;
+        }
+
+        .btn-new:hover {
+            background: #27ae60;
+        }
+
+        .btn-mistake {
+            background: #ff6b6b;
+        }
+
+        .btn-mistake:hover {
+            background: #e55050;
+        }
+
+        #progress-text {
+            text-align: center;
+            color: #888;
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 15px;
+            box-sizing: border-box;
+        }
+
+        /* 左右分栏布局 */
+        .layout-wrapper {
+            display: flex;
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            align-items: flex-start;
+            display: none;
+            box-sizing: border-box;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-height: 80vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        /* 顶部数据统计栏 */
+        .stat-bar {
+            display: flex;
+            justify-content: space-around;
+            background: #fff;
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #666;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .stat-item span {
+            font-size: 20px;
+            margin-left: 8px;
+            font-weight: 900;
+        }
+
+        #s-learn {
+            color: #4a90e2;
+        }
+
+        #s-remain {
+            color: #f39c12;
+        }
+
+        #s-error {
+            color: #e74c3c;
+        }
+
+        /* 右侧队列列表 */
+        .sidebar h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 16px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .queue-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .queue-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f5f5f5;
+            color: #888;
+            font-size: 14px;
+            border-radius: 6px;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .queue-item.active {
+            background: #e8f0fe;
+            color: #4a90e2;
+            font-weight: bold;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .queue-item.done {
+            color: #2ecc71;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .queue-item.mistake {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* 卡片容器 */
+        .anki-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .play-audio-btn {
+            background: #a78bfa;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 10px rgba(167, 139, 250, 0.3);
+            font-size: 22px;
+        }
+
+        .play-audio-btn:hover {
+            transform: scale(1.1);
+            background: #8b5cf6;
+        }
+
+        .word-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .big-word {
+            font-size: 42px;
+            color: #2c3e50;
+            font-weight: bold;
+            margin: 0 0 10px;
+            text-transform: lowercase;
+            word-break: break-word;
+        }
+
+        .phonetic-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            color: #666;
+        }
+
+        .m-word-img-container {
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .info-group {
+            margin-bottom: 20px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #999;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .info-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            word-break: break-word;
+            white-space: normal;
+        }
+
+        .memory-box {
+            background: #fff9db;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #fcc419;
+            margin-bottom: 20px;
+        }
+
+        #learn-en-meaning-box,
+        #anki-en-meaning-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4a90e2;
+            margin-bottom: 20px;
+        }
+
+        /* 阶段 */
+        #step-1-learn,
+        #step-2-spell,
+        #step-3-anki {
+            display: none;
+        }
+
+        .btn-go-spell {
+            width: 100%;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+            box-sizing: border-box;
+        }
+
+        .btn-go-spell:hover {
+            background: #27ae60;
+        }
+
+        #step-2-spell {
+            text-align: center;
+        }
+
+        .spell-input {
+            width: 90%;
+            max-width: 300px;
+            font-size: 32px;
+            padding: 12px;
+            text-align: center;
+            border: 3px solid #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            outline: none;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .spell-input:focus {
+            border-color: #4a90e2;
+        }
+
+        .spell-input.correct {
+            border-color: #2ecc71;
+            background: #f1fdf5;
+        }
+
+        .spell-input.error {
+            border-color: #ff4757;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-8px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(8px);
+            }
+        }
+
+        .anki-footer {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .eval-btn {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .eval-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .eval-key {
+            font-size: 10px;
+            color: #aaa;
+            margin-bottom: 3px;
+            border: 1px solid #ccc;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        .eval-text {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .eval-again .eval-text {
+            color: #ff4757;
+        }
+
+        .eval-hard .eval-text {
+            color: #ffa502;
+        }
+
+        .eval-good .eval-text {
+            color: #2ed573;
+        }
+
+        .eval-easy .eval-text {
+            color: #1e90ff;
+        }
+
+        #finish-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            .layout-wrapper {
+                flex-direction: column;
+                padding: 0;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+
+            .anki-card {
+                padding: 20px;
+            }
+
+            .big-word {
+                font-size: 32px;
+            }
+
+            .spell-input {
+                font-size: 24px;
+            }
+
+            .btn-act {
+                min-width: 30%;
+                font-size: 13px;
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard">
+        <h2 style="text-align:center; margin-top:0; color:#333;">📖 专属记忆训练</h2>
+        <div class="controls">
+            <select id="set-cat" style="flex:1;">
+                <option value="">全部词库</option>
+            </select>
+            <input type="number" id="set-limit" value="15" style="width: 80px;"> 词
+        </div>
+        <div class="btn-group" id="main-btn-group">
+            <button class="btn-act btn-review" onclick="startSession('review')">🔄 智能复习</button>
+            <button class="btn-act btn-new" onclick="startSession('new')">🆕 学习新词</button>
+            <button class="btn-act btn-mistake" onclick="startSession('mistake')">🔥 错题攻坚</button>
+        </div>
+        <div id="progress-text"></div>
+    </div>
+
+    <audio id="sys-audio" src="" preload="auto"></audio>
+    <audio id="m-en-audio" src="" preload="auto"></audio>
+    <audio id="m-ex-audio" src="" preload="auto"></audio>
+
+    <div class="layout-wrapper" id="learning-layout">
+
+        <div class="main-content">
+            <div class="stat-bar">
+                <div class="stat-item">已学<span id="s-learn">0</span></div>
+                <div class="stat-item">剩余<span id="s-remain">0</span></div>
+                <div class="stat-item">答错<span id="s-error">0</span></div>
+            </div>
+
+            <div class="anki-card">
+                <div id="step-1-learn">
+                    <div class="word-header">
+                        <h2 class="big-word" id="learn-word">Word</h2>
+                        <div class="phonetic-row">
+                            <span id="learn-phonetic">[/phonetic/]</span>
+                            <button class="play-audio-btn" onclick="playSysAudio()">🔊</button>
+                        </div>
+                    </div>
+
+                    <div class="m-word-img-container" id="learn-img-container"></div>
+
+                    <div class="info-group" id="learn-en-meaning-box">
+                        <span class="info-label" style="color:#4a90e2;">英文释义 Definition</span>
+                        <div class="info-content" id="learn-en-meaning" style="font-style:italic;"></div>
+                    </div>
+
+                    <div class="info-group"><span class="info-label">中文释义</span>
+                        <div class="info-content" id="learn-meaning"></div>
+                    </div>
+                    <div class="memory-box" id="learn-memory-box"><span class="info-label"
+                            style="color:#b8860b">记忆助手</span>
+                        <div class="info-content" id="learn-memory"></div>
+                    </div>
+                    <div class="info-group" id="learn-example-box"><span class="info-label">例句解析</span>
+                        <div class="info-content" id="learn-example"></div>
+                    </div>
+
+                    <button class="btn-go-spell" onclick="goToStep2()">我记住了，去拼写 👉 (按空格键)</button>
+                </div>
+
+                <div id="step-2-spell">
+                    <div style="color:#888; margin-bottom:20px;">听音并回想刚才的单词拼写</div>
+                    <div class="phonetic-row" style="margin-bottom:20px;">
+                        <span id="spell-phonetic">[/phonetic/]</span>
+                        <button class="play-audio-btn" onclick="playSysAudio()">🔊</button>
+                    </div>
+                    <input type="text" id="spell-input" class="spell-input" placeholder="输入单词..." autocomplete="off">
+                    <div class="info-group"
+                        style="text-align:left; background:#fafafa; padding:15px; border-radius:8px;"><span
+                            class="info-label">中文提示</span>
+                        <div class="info-content" id="spell-hint"></div>
+                    </div>
+                    <button
+                        style="background:none; border:none; color:#ff4757; text-decoration:underline; margin-top:20px; cursor:pointer;"
+                        onclick="goToStep3()">想不起来？看答案</button>
+                </div>
+
+                <div id="step-3-anki">
+                    <div class="word-header">
+                        <h2 class="big-word" id="anki-word">Word</h2>
+                        <div class="phonetic-row">
+                            <span id="anki-phonetic">[/phonetic/]</span>
+                            <button class="play-audio-btn" onclick="playSysAudio()">🔊</button>
+                        </div>
+                    </div>
+
+                    <div class="m-word-img-container" id="anki-img-container"></div>
+
+                    <div class="info-group" id="anki-en-meaning-box">
+                        <span class="info-label" style="color:#4a90e2;">英文释义 Definition</span>
+                        <div class="info-content" id="anki-en-meaning" style="font-style:italic;"></div>
+                    </div>
+
+                    <div class="info-group"><span class="info-label">中文释义</span>
+                        <div class="info-content" id="anki-meaning"></div>
+                    </div>
+                    <div class="memory-box" id="anki-memory-box"><span class="info-label"
+                            style="color:#b8860b">记忆助手</span>
+                        <div class="info-content" id="anki-memory"></div>
+                    </div>
+                    <div class="info-group" id="anki-example-box"><span class="info-label">例句解析</span>
+                        <div class="info-content" id="anki-example"></div>
+                    </div>
+
+                    <div
+                        style="text-align:center; color:#999; font-size:13px; margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+                        根据回忆难度打分 (可按键盘 1-4)：</div>
+                    <div class="anki-footer">
+                        <button class="eval-btn eval-again" onclick="submitAnki(1)"><span class="eval-key">1</span><span
+                                class="eval-text">重来(记错题)</span></button>
+                        <button class="eval-btn eval-hard" onclick="submitAnki(2)"><span class="eval-key">2</span><span
+                                class="eval-text">困难</span></button>
+                        <button class="eval-btn eval-good" onclick="submitAnki(3)"><span class="eval-key">3</span><span
+                                class="eval-text">良好</span></button>
+                        <button class="eval-btn eval-easy" onclick="submitAnki(4)"><span class="eval-key">4</span><span
+                                class="eval-text">简单</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <h3>📝 当前学习队列</h3>
+            <ul class="queue-list" id="queue-list">
+            </ul>
+        </div>
+    </div>
+
+    <div id="finish-screen">
+        <h1 style="font-size:48px; margin:0 0 10px;">🎉</h1>
+        <h2 style="color:#2ecc71;">训练完成！</h2>
+        <p style="color:#666;">所有单词进度已同步。错题已进入红色通缉令！</p>
+        <button class="btn-act btn-review" style="margin-top:20px;" onclick="location.reload()">再来一组</button>
+    </div>
+
+    <script>
+        // 🛡️ 纯净沙盒隔离：绝对杜绝 && 和 ||
+        (function () {
+            var words = [];
+            var currentIndex = 0;
+            var currentWord = null;
+            var stats = { learned: 0, remain: 0, error: 0 };
+
+            var s1 = document.getElementById('step-1-learn');
+            var s2 = document.getElementById('step-2-spell');
+            var s3 = document.getElementById('step-3-anki');
+            var spellInput = document.getElementById('spell-input');
+
+            // 音频DOM
+            var sysAudio = document.getElementById('sys-audio');
+            var mEnAudio = document.getElementById('m-en-audio');
+            var mExAudio = document.getElementById('m-ex-audio');
+
+            // 🟢 全局音频防重叠机制
+            function stopAllAudio() {
+                if (sysAudio) { sysAudio.pause(); sysAudio.currentTime = 0; }
+                if (mEnAudio) { mEnAudio.pause(); mEnAudio.currentTime = 0; }
+                if (mExAudio) { mExAudio.pause(); mExAudio.currentTime = 0; }
+            }
+
+            // 🟢 智能 AI 语音兜底函数
+            function fallbackToAIVoice(text) {
+                if ('speechSynthesis' in window) {
+                    var utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'en-US'; // 强制美音
+                    utterance.rate = 0.9;     // 语速微调
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+
+            // 🟢 改造后的音频播放：支持 404 捕获并唤醒 AI
+            window.playSysAudio = function () {
+                if (currentWord) {
+                    stopAllAudio();
+                    if (currentWord.audio) {
+                        sysAudio.src = currentWord.audio;
+                        sysAudio.currentTime = 0;
+
+                        // 文件 404 或损坏时，唤醒 AI
+                        sysAudio.onerror = function () {
+                            fallbackToAIVoice(currentWord.word);
+                        };
+
+                        sysAudio.play().catch(function (e) {
+                            fallbackToAIVoice(currentWord.word);
+                        });
+                    } else {
+                        // 没配录音字段，直接唤醒 AI
+                        fallbackToAIVoice(currentWord.word);
+                    }
+                }
+            }
+
+            window.playEnAudio = function () {
+                if (currentWord) {
+                    stopAllAudio();
+                    // 这里我们假设英英释义如果不存发音文件，就用 AI 读单词本身（或者你想读例句，这里保守处理读单词）
+                    mEnAudio.currentTime = 0;
+                    mEnAudio.onerror = function () {
+                        fallbackToAIVoice(currentWord.word);
+                    };
+                    mEnAudio.play().catch(function (e) {
+                        fallbackToAIVoice(currentWord.word);
+                    });
+                }
+            }
+
+            window.playExAudio = function () {
+                if (currentWord) {
+                    stopAllAudio();
+                    mExAudio.currentTime = 0;
+                    mExAudio.onerror = function () {
+                        fallbackToAIVoice(currentWord.word);
+                    };
+                    mExAudio.play().catch(function (e) {
+                        fallbackToAIVoice(currentWord.word);
+                    });
+                }
+            }
+
+            function safeParseJSON(text) {
+                try {
+                    var match = text.match(/\{[\s\S]*\}/);
+                    if (match) { return JSON.parse(match[0]); }
+                    return JSON.parse(text);
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function safeGet(url) {
+                return fetch(url, {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+            }
+
+            function safeFetch(url, formData) {
+                return fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+            }
+
+            var setText = function (id, txt) {
+                var el = document.getElementById(id);
+                if (el) { el.innerText = txt; }
+            };
+
+            var setHTML = function (id, html) {
+                var el = document.getElementById(id);
+                if (el) { el.innerHTML = html; }
+            };
+
+            var setDisplay = function (id, display) {
+                var el = document.getElementById(id);
+                if (el) { el.style.display = display; }
+            };
+
+            function initApp() {
+                try { fetchCategories(); } catch (e) { }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initApp);
+            } else {
+                setTimeout(initApp, 100);
+            }
+
+            function fetchCategories() {
+                safeGet('/wp-admin/admin-ajax.php?action=get_word_categories_v5')
+                    .then(function (res) { return res.text(); })
+                    .then(function (text) {
+                        var json = safeParseJSON(text);
+                        if (json) {
+                            if (json.success) {
+                                var sel = document.getElementById('set-cat');
+                                if (sel) {
+                                    var optHtml = '<option value="">全部词库</option>';
+                                    for (var i = 0; i < json.data.length; i++) {
+                                        var c = json.data[i];
+                                        optHtml += '<option value="' + c.slug + '">' + c.name + '</option>';
+                                    }
+                                    sel.innerHTML = optHtml;
+
+                                    var lastCat = localStorage.getItem('last_selected_vocab_cat');
+                                    if (lastCat) { sel.value = lastCat; }
+                                }
+
+                                var limitInputEl = document.getElementById('set-limit');
+                                if (limitInputEl) {
+                                    var lastLimit = localStorage.getItem('last_selected_vocab_limit');
+                                    if (lastLimit) { limitInputEl.value = lastLimit; }
+                                }
+                            }
+                        }
+                    })
+                    .catch(function (e) { });
+            }
+
+            var catSelect = document.getElementById('set-cat');
+            if (catSelect) {
+                catSelect.addEventListener('change', function () {
+                    localStorage.setItem('last_selected_vocab_cat', this.value);
+                });
+            }
+
+            var limitInputEl = document.getElementById('set-limit');
+            if (limitInputEl) {
+                limitInputEl.addEventListener('change', function () {
+                    localStorage.setItem('last_selected_vocab_limit', this.value);
+                });
+            }
+
+            window.startSession = function (mode) {
+                var limitVal = 15;
+                var elLimit = document.getElementById('set-limit');
+                if (elLimit) {
+                    if (elLimit.value) { limitVal = elLimit.value; }
+                }
+
+                var catVal = '';
+                var elCat = document.getElementById('set-cat');
+                if (elCat) {
+                    if (elCat.value) { catVal = elCat.value; }
+                }
+
+                setDisplay('main-btn-group', 'none');
+                setDisplay('progress-text', 'block');
+
+                var loadingMsg = "正在检索单词...";
+                if (mode === 'review') { loadingMsg = "正在检索到期需复习的单词..."; }
+                if (mode === 'mistake') { loadingMsg = "正在提取历史错题..."; }
+                setHTML('progress-text', loadingMsg);
+
+                var fd = new FormData();
+                var reqAction = 'get_daily_words_v5';
+                if (mode === 'mistake') { reqAction = 'get_mistake_words_v5'; }
+
+                fd.append('action', reqAction);
+                fd.append('limit', limitVal);
+                if (catVal !== '') { fd.append('category', catVal); }
+                if (mode !== 'mistake') { fd.append('task_type', mode); }
+
+                safeFetch('/wp-admin/admin-ajax.php', fd)
+                    .then(function (res) { return res.text(); })
+                    .then(function (text) {
+                        var json = safeParseJSON(text);
+
+                        var needsLogin = false;
+                        if (text === '0') { needsLogin = true; }
+                        if (text === 0) { needsLogin = true; }
+                        if (json) {
+                            if (json.success === false) {
+                                if (json.data === '请登录') { needsLogin = true; }
+                            }
+                        }
+
+                        if (needsLogin) {
+                            setHTML('progress-text', '<span style="font-size:18px; display:block; margin-bottom:15px; color:#e74c3c;">⚠️ 必须登录后才能开启学习挑战！</span><button onclick="window.location.href=\'/wp-login.php\'" style="padding:10px 25px; border-radius:8px; border:none; background:#ff4757; color:#fff; font-weight:bold; cursor:pointer; font-size:16px;">立即登录</button>');
+                            return;
+                        }
+
+                        var isValidData = false;
+                        if (json) {
+                            if (json.success) {
+                                if (json.data) {
+                                    if (json.data.length > 0) {
+                                        isValidData = true;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (isValidData) {
+                            words = json.data;
+                            currentIndex = 0;
+                            stats.learned = 0;
+                            stats.remain = words.length;
+                            stats.error = 0;
+
+                            setDisplay('progress-text', 'none');
+                            setDisplay('learning-layout', 'flex');
+                            updateStatsAndQueue();
+                            loadCurrentWord();
+                        } else {
+                            var msg = "该词库下暂无任务。";
+                            if (mode === 'mistake') { msg = "✅ 完美！当前没有任何错题待复习！"; }
+                            if (mode === 'review') { msg = "🍵 休息一下吧！目前没有到时间需要复习的单词。"; }
+                            setHTML('progress-text', msg);
+                            setTimeout(function () {
+                                setDisplay('progress-text', 'none');
+                                setDisplay('main-btn-group', 'flex');
+                            }, 3000);
+                        }
+                    })
+                    .catch(function (e) {
+                        setHTML('progress-text', "网络请求被拦截，请尝试刷新重试");
+                        setTimeout(function () {
+                            setDisplay('progress-text', 'none');
+                            setDisplay('main-btn-group', 'flex');
+                        }, 3000);
+                    });
+            }
+
+            function updateStatsAndQueue() {
+                setText('s-learn', stats.learned);
+                setText('s-remain', stats.remain);
+                setText('s-error', stats.error);
+
+                var q = document.getElementById('queue-list');
+                if (q) {
+                    q.innerHTML = '';
+                    for (var i = 0; i < words.length; i++) {
+                        var w = words[i];
+                        var statusClass = '';
+                        var icon = '⏳';
+
+                        if (i === currentIndex) {
+                            statusClass = 'active';
+                            icon = '👉';
+                        } else {
+                            if (i < currentIndex) {
+                                if (w.wasError) {
+                                    statusClass = 'mistake';
+                                    icon = '❌';
+                                } else {
+                                    statusClass = 'done';
+                                    icon = '✅';
+                                }
+                            }
+                        }
+                        q.innerHTML += '<li class="queue-item ' + statusClass + '"><span>' + (i + 1) + '. ' + w.word + '</span><span>' + icon + '</span></li>';
+                    }
+                }
+            }
+
+            function renderCardInfo(prefix, wordData) {
+                setText(prefix + '-word', wordData.word);
+
+                var phoneticStr = '[无音标]';
+                if (wordData.phonetic) { phoneticStr = wordData.phonetic; }
+                setHTML(prefix + '-phonetic', phoneticStr);
+
+                var meaningStr = '暂无释义';
+                if (wordData.meaning) { meaningStr = wordData.meaning; }
+                setHTML(prefix + '-meaning', meaningStr);
+
+                var imgContainer = document.getElementById(prefix + '-img-container');
+                if (imgContainer) {
+                    var imgHtml = '';
+                    if (wordData.img1) {
+                        if (wordData.img1 !== '') {
+                            imgHtml += '<img decoding="async" src="' + wordData.img1 + '" style="width:100%; display:block; margin:0 auto 15px auto; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1);">';
+                        }
+                    }
+                    if (wordData.img2) {
+                        if (wordData.img2 !== '') {
+                            imgHtml += '<img decoding="async" src="' + wordData.img2 + '" style="width:100%; display:block; margin:0 auto 15px auto; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1);">';
+                        }
+                    }
+                    if (imgHtml !== '') {
+                        imgContainer.innerHTML = imgHtml;
+                        imgContainer.style.display = 'block';
+                    } else {
+                        imgContainer.style.display = 'none';
+                    }
+                }
+
+                var enMeaningBox = document.getElementById(prefix + '-en-meaning-box');
+                if (enMeaningBox) {
+                    if (wordData.en_meaning) {
+                        if (wordData.en_meaning.trim() !== '') {
+                            var enHtml = wordData.en_meaning;
+                            if (wordData.en_audio) {
+                                if (wordData.en_audio !== '') {
+                                    mEnAudio.src = wordData.en_audio;
+                                    var speakerBtn = ' <span style="cursor:pointer; font-size:18px; vertical-align:middle; margin-left:8px;" onclick="playEnAudio()">🔊</span>';
+                                    enHtml += speakerBtn;
+                                }
+                            }
+                            setHTML(prefix + '-en-meaning', enHtml);
+                            enMeaningBox.style.display = 'block';
+                        } else { enMeaningBox.style.display = 'none'; }
+                    } else { enMeaningBox.style.display = 'none'; }
+                }
+
+                var memoryBox = document.getElementById(prefix + '-memory-box');
+                if (memoryBox) {
+                    if (wordData.memory) {
+                        if (wordData.memory.trim() !== '') {
+                            setHTML(prefix + '-memory', wordData.memory);
+                            memoryBox.style.display = 'block';
+                        } else { memoryBox.style.display = 'none'; }
+                    } else { memoryBox.style.display = 'none'; }
+                }
+
+                var exampleBox = document.getElementById(prefix + '-example-box');
+                if (exampleBox) {
+                    if (wordData.example) {
+                        if (wordData.example.trim() !== '') {
+                            var exHtml = wordData.example;
+                            if (wordData.example_audio) {
+                                if (wordData.example_audio !== '') {
+                                    mExAudio.src = wordData.example_audio;
+                                    var speakerBtnEx = ' <span style="cursor:pointer; font-size:18px; vertical-align:middle; margin-left:8px;" onclick="playExAudio()">🔊</span>';
+                                    exHtml += speakerBtnEx;
+                                }
+                            }
+                            setHTML(prefix + '-example', exHtml);
+                            exampleBox.style.display = 'block';
+                        } else { exampleBox.style.display = 'none'; }
+                    } else { exampleBox.style.display = 'none'; }
+                }
+            }
+
+            function loadCurrentWord() {
+                if (currentIndex >= words.length) {
+                    setDisplay('learning-layout', 'none');
+                    setDisplay('finish-screen', 'block');
+                    return;
+                }
+                currentWord = words[currentIndex];
+
+                renderCardInfo('learn', currentWord);
+                renderCardInfo('anki', currentWord);
+
+                var spellPhonetic = '[无音标]';
+                if (currentWord.phonetic) { spellPhonetic = currentWord.phonetic; }
+                setHTML('spell-phonetic', spellPhonetic);
+
+                var spellHint = '暂无释义';
+                if (currentWord.meaning) { spellHint = currentWord.meaning; }
+                setHTML('spell-hint', spellHint);
+
+                setDisplay('step-1-learn', 'block');
+                setDisplay('step-2-spell', 'none');
+                setDisplay('step-3-anki', 'none');
+
+                setTimeout(function () { window.playSysAudio(); }, 150);
+            }
+
+            window.goToStep2 = function () {
+                setDisplay('step-1-learn', 'none');
+                setDisplay('step-2-spell', 'block');
+                if (spellInput) {
+                    spellInput.value = '';
+                    spellInput.classList.remove('correct', 'error');
+                    setTimeout(function () { spellInput.focus(); }, 150);
+                }
+                window.playSysAudio();
+            }
+
+            window.goToStep3 = function () {
+                setDisplay('step-2-spell', 'none');
+                setDisplay('step-3-anki', 'block');
+                window.playSysAudio();
+            }
+
+            if (spellInput) {
+                spellInput.addEventListener('input', function () {
+                    if (currentWord) {
+                        if (this.value.trim().toLowerCase() === currentWord.word.toLowerCase()) {
+                            this.classList.add('correct');
+                            setTimeout(goToStep3, 400);
+                        }
+                    }
+                });
+                spellInput.addEventListener('keypress', function (e) {
+                    if (currentWord) {
+                        if (e.key === 'Enter') {
+                            if (this.value.trim().toLowerCase() !== currentWord.word.toLowerCase()) {
+                                this.classList.add('error');
+                                var self = this;
+                                setTimeout(function () { self.classList.remove('error'); }, 400);
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 键盘快捷键监听
+            document.addEventListener('keydown', function (e) {
+                if (e.code === 'Space') {
+                    if (s1) {
+                        if (s1.style.display === 'block') {
+                            e.preventDefault();
+                            goToStep2();
+                        }
+                    }
+                }
+                if (s3) {
+                    if (s3.style.display === 'block') {
+                        var code = e.code;
+                        if (code === 'Digit1') { submitAnki(1); }
+                        if (code === 'Numpad1') { submitAnki(1); }
+                        if (code === 'Digit2') { submitAnki(2); }
+                        if (code === 'Numpad2') { submitAnki(2); }
+                        if (code === 'Digit3') { submitAnki(3); }
+                        if (code === 'Numpad3') { submitAnki(3); }
+                        if (code === 'Digit4') { submitAnki(4); }
+                        if (code === 'Numpad4') { submitAnki(4); }
+                    }
+                }
+            });
+
+            window.submitAnki = function (rating) {
+                if (!currentWord) return;
+                var fd = new FormData();
+                fd.append('action', 'save_word_progress_v5');
+                fd.append('word_id', currentWord.id);
+                var isCor = 0;
+                if (rating > 1) { isCor = 1; }
+                fd.append('is_correct', isCor);
+                fd.append('rating', rating);
+
+                safeFetch('/wp-admin/admin-ajax.php', fd).catch(function (e) { });
+
+                stopAllAudio();
+
+                // 更新统计数据
+                if (rating === 1) {
+                    stats.error++;
+                    words[currentIndex].wasError = true;
+                }
+                stats.learned++;
+                stats.remain--;
+                currentIndex++;
+
+                updateStatsAndQueue();
+                loadCurrentWord();
+            }
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>智能单词消消乐 - 终极装甲优化版</title>
+    <style>
+        /* ==========================================
+           1. 全局布局与高级毛玻璃面板
+           ========================================== */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+            padding: 20px 10px;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin: 0 0 20px 0;
+            font-size: 28px;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .settings-bar {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .controls-row select,
+        .controls-row input {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            background: #fff;
+        }
+
+        .controls-row select:focus,
+        .controls-row input:focus {
+            border-color: #a18cd1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-act {
+            flex: 1;
+            min-width: 110px;
+            padding: 12px 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-review {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-review:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-new {
+            background: linear-gradient(to right, #43e97b 0%, #38f9d7 100%);
+            color: #2c3e50;
+        }
+
+        .btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67, 233, 123, 0.4);
+        }
+
+        .btn-mistake {
+            background: linear-gradient(to right, #ff0844 0%, #ffb199 100%);
+        }
+
+        .btn-mistake:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 8, 68, 0.4);
+        }
+
+        .btn-shuffle {
+            background: rgba(255, 255, 255, 0.9);
+            flex: 0 0 100%;
+            max-width: 250px;
+            margin-top: 5px;
+            border: 2px dashed #a18cd1;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #5B4B8A;
+            padding: 12px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-shuffle:hover {
+            background: #fff;
+            transform: translateY(-2px);
+            border-style: solid;
+            box-shadow: 0 6px 20px rgba(161, 140, 209, 0.3);
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 500px;
+            justify-content: space-around;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-sizing: border-box;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 900;
+            color: #333;
+            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        #val-timer {
+            color: #ff4757;
+        }
+
+        #val-combo {
+            color: #f1c40f;
+        }
+
+        #val-score {
+            color: #2ecc71;
+        }
+
+        #loading {
+            font-size: 18px;
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px 30px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+        }
+
+        #toast-container {
+            position: fixed;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, bottom 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #toast-container.show {
+            opacity: 1;
+            bottom: 15%;
+        }
+
+        /* 核心方块样式 */
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+            gap: 12px;
+            width: 100%;
+            max-width: 850px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .bubble {
+            width: 100%;
+            height: 95px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.95);
+            color: #2c3e50;
+            font-weight: 900;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s;
+            text-align: center;
+            padding: 8px;
+            margin: 0 auto;
+            border: 3px solid transparent;
+            box-sizing: border-box;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        .bubble-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+
+        .card-en {
+            border-color: #7bed9f;
+            font-size: 15px;
+            color: #1e8449;
+        }
+
+        .card-cn {
+            border-color: #d5b8ff;
+            color: #5B4B8A;
+        }
+
+        .bubble:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .bubble.selected {
+            border-width: 4px;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            border-style: solid;
+        }
+
+        .card-en.selected {
+            border-color: #2ed573;
+            background: #f1fdf5;
+        }
+
+        .card-cn.selected {
+            border-color: #a78bfa;
+            background: #f8f5ff;
+        }
+
+        .hidden {
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0);
+        }
+
+        /* Hover & Tooltip */
+        .bubble::after {
+            content: attr(data-fulltext);
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.95);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: normal;
+            white-space: normal;
+            width: max-content;
+            max-width: 220px;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .bubble::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(30, 30, 30, 0.95);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        @media (hover: hover) {
+
+            .bubble:hover::after,
+            .bubble:hover::before {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        .bubble.mobile-show-tip::after,
+        .bubble.mobile-show-tip::before {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @keyframes popOut {
+            0% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .match-anim {
+            animation: popOut 0.3s forwards;
+        }
+
+        @keyframes shakeMatch {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-8px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(8px);
+            }
+        }
+
+        .wrong-anim {
+            animation: shakeMatch 0.4s;
+            border-color: #ff4757 !important;
+            border-style: solid !important;
+            background: #fff5f5 !important;
+            color: #c0392b !important;
+        }
+
+        @media screen and (max-width: 600px) {
+            .settings-bar {
+                padding: 12px 10px;
+                width: 95%;
+            }
+
+            .btn-act {
+                min-width: 30%;
+                font-size: 13px;
+                padding: 10px 4px;
+            }
+
+            .controls-row select {
+                width: 140px;
+            }
+
+            #game-board {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+
+            .bubble {
+                height: 85px;
+                padding: 4px;
+                border-width: 2px;
+                border-radius: 12px;
+            }
+
+            .bubble-text {
+                font-size: 12px;
+            }
+
+            .bubble.selected {
+                border-width: 3px;
+            }
+        }
+
+        /* Anki 弹窗样式 */
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal-overlay.active {
+            display: flex;
+        }
+
+        .anki-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            font-family: -apple-system, sans-serif;
+            color: #333;
+            width: 90%;
+            max-width: 550px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-sizing: border-box;
+            animation: modalFadeIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .error-badge {
+            text-align: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 8px;
+            background: linear-gradient(to right, #ff4757, #ff6b81);
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
+        }
+
+        .play-audio-btn {
+            background: #a78bfa;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(167, 139, 250, 0.4);
+        }
+
+        .play-audio-btn:hover {
+            background: #8b5cf6;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .play-audio-btn:active {
+            transform: scale(0.95);
+        }
+
+        #m-card-front {
+            text-align: center;
+        }
+
+        .front-phonetic {
+            font-size: 28px;
+            color: #444;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .front-phonetic .ipa {
+            font-size: 22px;
+            font-family: sans-serif;
+            color: #666;
+        }
+
+        .type-input {
+            width: 100%;
+            max-width: 400px;
+            font-size: 32px;
+            padding: 12px;
+            text-align: center;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .type-input:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.1);
+        }
+
+        .type-input.correct {
+            border-color: #2ed573;
+            background: #f1fdf5;
+            color: #27ae60;
+        }
+
+        .type-input.error {
+            border-color: #ff4757;
+            animation: shakeMatch 0.4s;
+            color: #c0392b;
+            background: #fff5f5;
+        }
+
+        .btn-view-answer {
+            background: none;
+            border: none;
+            color: #ff4757;
+            font-size: 14px;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 15px;
+            padding: 5px;
+            transition: color 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-view-answer:hover {
+            color: #d0021b;
+        }
+
+        #m-card-back {
+            display: none;
+        }
+
+        .back-header {
+            text-align: center;
+            border-bottom: 2px dashed #eee;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .back-word {
+            font-size: 52px;
+            color: #5B4B8A;
+            font-weight: 900;
+            margin: 0;
+            line-height: 1.2;
+            text-transform: lowercase;
+        }
+
+        .info-block {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .info-label {
+            color: #999;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+            letter-spacing: 1px;
+        }
+
+        .info-content {
+            font-size: 17px;
+            line-height: 1.7;
+            color: #2c3e50;
+            word-break: break-word;
+            white-space: normal;
+        }
+
+        .memory-box {
+            background: #fff9db;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #fcc419;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        #m-en-meaning-block {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #a78bfa;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .m-word-img-container {
+            text-align: center;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .anki-footer {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            border-top: 2px dashed #eee;
+            padding-top: 20px;
+        }
+
+        .eval-btn {
+            flex: 1;
+            background: #fff;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 12px 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .eval-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            border-color: #ddd;
+        }
+
+        .eval-key {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 5px;
+            border: 1px solid #ccc;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+
+        .eval-text {
+            font-weight: 900;
+            font-size: 14px;
+        }
+
+        .eval-good .eval-text {
+            color: #2ed573;
+        }
+
+        @media screen and (max-width: 600px) {
+            .anki-card {
+                padding: 25px 20px !important;
+                width: 95% !important;
+                border-radius: 16px;
+            }
+
+            .back-word {
+                font-size: 38px !important;
+            }
+
+            .front-phonetic {
+                font-size: 20px !important;
+            }
+
+            .type-input {
+                font-size: 24px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>✨ 智能单词消消乐 ✨</h1>
+
+    <div class="settings-bar">
+        <div class="controls-row">
+            📚 <select id="setting-cat">
+                <option value="">加载词库...</option>
+            </select>
+            🔢 <input type="number" id="setting-limit" value="10" min="2" max="25" style="width: 50px;"> 对
+        </div>
+        <div class="btn-group" id="main-btn-group">
+            <button class="btn-act btn-review" onclick="startSession('review')">🔄 智能复习</button>
+            <button class="btn-act btn-new" onclick="startSession('new')">🆕 学习新词</button>
+            <button class="btn-act btn-mistake" onclick="startSession('mistake')">🔥 错题攻坚</button>
+        </div>
+    </div>
+
+    <div class="game-stats">
+        <div class="stat-item"><span class="stat-label">分数</span><span class="stat-value" id="val-score">0</span></div>
+        <div class="stat-item"><span class="stat-label">连击</span><span class="stat-value" id="val-combo">0</span></div>
+        <div class="stat-item"><span class="stat-label">用时</span><span class="stat-value" id="val-timer">0s</span></div>
+    </div>
+
+    <button class="btn-shuffle" onclick="shuffleBoard()" style="display:none;" id="btn-shuffle-wrap">🔀 重新洗牌</button>
+
+    <div id="loading" style="display:none;"></div>
+    <div id="game-board"></div>
+
+    <div id="toast-container"></div>
+
+    <div id="modal-overlay">
+        <div class="anki-card">
+            <div class="error-badge">💥 匹配错误，请完成拼写复习</div>
+
+            <div id="m-card-front">
+                <div style="color:#888; font-size:14px; margin-bottom:15px;">听音拼写正确的单词</div>
+                <div class="front-phonetic">
+                    <span id="m-front-phonetic">[/phonetic/]</span>
+                    <button class="play-audio-btn" onclick="playModalWordAudio()">🔊</button>
+                </div>
+                <input type="text" id="m-type-word" class="type-input" placeholder="输入单词..." autocomplete="off">
+                <p style="color:#bbb; font-size:12px; margin-top:10px; margin-bottom: 5px;">拼写正确后自动显示解析</p>
+                <button class="btn-view-answer" id="btn-show-answer">想不起来？直接查看答案 💡</button>
+            </div>
+
+            <div id="m-card-back">
+                <div class="back-header">
+                    <h2 class="back-word" id="m-word">Word</h2>
+                    <div class="front-phonetic" style="margin-top:10px; margin-bottom:0;">
+                        <span id="m-back-phonetic">[/phonetic/]</span>
+                        <button class="play-audio-btn" onclick="playModalWordAudio()">🔊</button>
+                    </div>
+                </div>
+
+                <div class="m-word-img-container" id="m-word-img-container"></div>
+
+                <div class="info-block" id="m-en-meaning-block">
+                    <span class="info-label" style="color:#a78bfa;">英文释义 Definition</span>
+                    <div class="info-content" id="m-en-meaning" style="font-style:italic;"></div>
+                </div>
+
+                <div class="info-block" id="m-meaning-block"><span class="info-label">中文释义</span>
+                    <div class="info-content" id="m-meaning"></div>
+                </div>
+                <div class="info-block memory-box" id="m-memory-block"><span class="info-label"
+                        style="color:#d4ac0d;">记忆助手</span>
+                    <div class="info-content" id="m-memory"></div>
+                </div>
+                <div class="info-block" id="m-example-block"><span class="info-label">例句解析</span>
+                    <div class="info-content" style="font-family: Georgia, serif;" id="m-example"></div>
+                </div>
+
+                <div
+                    style="text-align:center; color:#bbb; font-size:12px; margin-top:20px; border-top: 1px dashed #eee; padding-top: 15px;">
+                    已记入错题本！按空格键继续：</div>
+
+                <div class="anki-footer">
+                    <button class="eval-btn eval-good" onclick="submitAnki(null)"><span
+                            class="eval-key">Space</span><span class="eval-text">继续游戏</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="game-audio" src="" preload="auto"></audio>
+    <audio id="m-audio" src="" preload="auto"></audio>
+    <audio id="m-en-audio" src="" preload="auto"></audio>
+    <audio id="m-ex-audio" src="" preload="auto"></audio>
+
+    <script>
+        // 🛡️ 纯净沙盒隔离：杜绝一切转义报错
+        (function () {
+            var wordList = [];
+            var cards = [];
+            var firstCard = null;
+            var secondCard = null;
+            var lockBoard = false;
+            var matchedCount = 0;
+            var timerInterval;
+            var seconds = 0;
+            var score = 0;
+            var combo = 0;
+            var currentErrorWordData = null;
+
+            var failedWordIds = {};
+
+            var gameAudio = document.getElementById('game-audio');
+            var mAudio = document.getElementById('m-audio');
+            var mEnAudio = document.getElementById('m-en-audio');
+            var mExAudio = document.getElementById('m-ex-audio');
+
+            var board = document.getElementById('game-board');
+            var loading = document.getElementById('loading');
+            var modal = document.getElementById('modal-overlay');
+            var mCardFront = document.getElementById('m-card-front');
+            var mCardBack = document.getElementById('m-card-back');
+            var mTypeWord = document.getElementById('m-type-word');
+            var toast = document.getElementById('toast-container');
+
+            var catSelect = document.getElementById('setting-cat');
+            var limitInput = document.getElementById('setting-limit');
+
+            // 🟢 全局音频防重叠机制
+            function stopAllAudio() {
+                if (gameAudio) { gameAudio.pause(); gameAudio.currentTime = 0; }
+                if (mAudio) { mAudio.pause(); mAudio.currentTime = 0; }
+                if (mEnAudio) { mEnAudio.pause(); mEnAudio.currentTime = 0; }
+                if (mExAudio) { mExAudio.pause(); mExAudio.currentTime = 0; }
+            }
+
+            // 🟢 智能 AI 语音兜底函数
+            function fallbackToAIVoice(text) {
+                var hasSpeech = false;
+                if ('speechSynthesis' in window) { hasSpeech = true; }
+                if (hasSpeech) {
+                    var utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.9;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+
+            // 🟢 供弹窗内的喇叭按钮调用的播放方法
+            window.playModalWordAudio = function () {
+                if (currentErrorWordData) {
+                    stopAllAudio();
+                    var hasAudio = false;
+                    if (currentErrorWordData.audio) {
+                        if (currentErrorWordData.audio !== '') { hasAudio = true; }
+                    }
+                    if (hasAudio) {
+                        mAudio.currentTime = 0;
+                        mAudio.onerror = function () { fallbackToAIVoice(currentErrorWordData.word); };
+                        mAudio.play().catch(function (e) { fallbackToAIVoice(currentErrorWordData.word); });
+                    } else {
+                        fallbackToAIVoice(currentErrorWordData.word);
+                    }
+                }
+            };
+
+            window.playModalEnAudio = function () {
+                if (currentErrorWordData) {
+                    stopAllAudio();
+                    var hasEnAudio = false;
+                    if (currentErrorWordData.en_audio) {
+                        if (currentErrorWordData.en_audio !== '') { hasEnAudio = true; }
+                    }
+                    if (hasEnAudio) {
+                        mEnAudio.currentTime = 0;
+                        mEnAudio.onerror = function () { fallbackToAIVoice(currentErrorWordData.word); };
+                        mEnAudio.play().catch(function (e) { fallbackToAIVoice(currentErrorWordData.word); });
+                    } else {
+                        fallbackToAIVoice(currentErrorWordData.word);
+                    }
+                }
+            };
+
+            window.playModalExAudio = function () {
+                if (currentErrorWordData) {
+                    stopAllAudio();
+                    var hasExAudio = false;
+                    if (currentErrorWordData.example_audio) {
+                        if (currentErrorWordData.example_audio !== '') { hasExAudio = true; }
+                    }
+                    if (hasExAudio) {
+                        mExAudio.currentTime = 0;
+                        mExAudio.onerror = function () { fallbackToAIVoice(currentErrorWordData.word); };
+                        mExAudio.play().catch(function (e) { fallbackToAIVoice(currentErrorWordData.word); });
+                    } else {
+                        fallbackToAIVoice(currentErrorWordData.word);
+                    }
+                }
+            };
+
+            function escapeRegExp(string) { return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+            // 🟢 改造 fetch 请求：强制带上安全凭据和请求头，防 WAF 拦截
+            function safeFetch(url, formData) {
+                return fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+            }
+
+            function safeParseJSON(text) {
+                try {
+                    var match = text.match(/\{[\s\S]*\}/);
+                    if (match) { return JSON.parse(match[0]); }
+                    return JSON.parse(text);
+                } catch (e) { return null; }
+            }
+
+            function initApp() {
+                try { fetchCategories(); } catch (e) { }
+            }
+
+            if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initApp); } else { setTimeout(initApp, 100); }
+
+            function fetchCategories() {
+                fetch('/wp-admin/admin-ajax.php?action=get_word_categories_v5', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(function (res) { return res.text(); })
+                    .then(function (text) {
+                        var json = safeParseJSON(text);
+                        if (json) {
+                            if (json.success) {
+                                if (catSelect) {
+                                    var optHtml = '<option value="">全部词库</option>';
+                                    for (var i = 0; i < json.data.length; i++) {
+                                        var cat = json.data[i];
+                                        optHtml += '<option value="' + cat.slug + '">' + cat.name + '</option>';
+                                    }
+                                    catSelect.innerHTML = optHtml;
+                                    var savedCat = localStorage.getItem('anki_match_cat') || '';
+                                    if (savedCat) { catSelect.value = savedCat; }
+                                }
+                                if (limitInput) {
+                                    var savedLimit = localStorage.getItem('anki_match_limit') || 10;
+                                    if (savedLimit) { limitInput.value = savedLimit; }
+                                }
+                            }
+                        }
+                    })
+                    .catch(function (e) { });
+            }
+
+            if (catSelect) { catSelect.addEventListener('change', function () { localStorage.setItem('anki_match_cat', this.value); }); }
+            if (limitInput) { limitInput.addEventListener('change', function () { localStorage.setItem('anki_match_limit', this.value); }); }
+
+            window.shuffleBoard = function () {
+                if (lockBoard) { return; }
+                var bubbles = Array.from(board.children);
+                bubbles.sort(function () { return Math.random() - 0.5; });
+                board.innerHTML = '';
+                for (var i = 0; i < bubbles.length; i++) { board.appendChild(bubbles[i]); }
+            };
+
+            function showToast(msg) {
+                toast.innerText = msg; toast.classList.add('show');
+                setTimeout(function () { toast.classList.remove('show'); }, 2000);
+            }
+
+            window.startSession = function (mode) {
+                board.innerHTML = '';
+                document.getElementById('main-btn-group').style.display = 'none';
+                document.getElementById('btn-shuffle-wrap').style.display = 'none';
+                loading.style.display = 'block';
+
+                var loadingMsg = "正在检索单词...";
+                if (mode === 'review') { loadingMsg = "正在检索到期需复习的单词..."; }
+                if (mode === 'mistake') { loadingMsg = "正在提取历史错题..."; }
+                loading.innerText = loadingMsg;
+
+                clearInterval(timerInterval);
+                score = 0; combo = 0; seconds = 0;
+                document.getElementById('val-score').innerText = score;
+                document.getElementById('val-combo').innerText = combo;
+                document.getElementById('val-timer').innerText = "0s";
+
+                if (limitInput) { localStorage.setItem('anki_match_limit', limitInput.value); }
+                if (catSelect) { localStorage.setItem('anki_match_cat', catSelect.value); }
+
+                var formData = new FormData();
+                var reqAction = 'get_daily_words_v5';
+                if (mode === 'mistake') { reqAction = 'get_mistake_words_v5'; }
+
+                formData.append('action', reqAction);
+
+                if (limitInput) { formData.append('limit', limitInput.value); } else { formData.append('limit', 10); }
+
+                if (catSelect) {
+                    if (catSelect.value) { formData.append('category', catSelect.value); }
+                }
+
+                if (mode !== 'mistake') { formData.append('task_type', mode); }
+
+                safeFetch('/wp-admin/admin-ajax.php', formData)
+                    .then(function (res) { return res.text(); })
+                    .then(function (text) {
+                        var json = safeParseJSON(text);
+
+                        var needsLogin = false;
+                        if (text === '0') { needsLogin = true; }
+                        if (text === 0) { needsLogin = true; }
+                        if (json) {
+                            if (json.success === false) {
+                                if (json.data === '请登录') { needsLogin = true; }
+                            }
+                        }
+
+                        if (needsLogin) {
+                            loading.innerHTML = '<span style="font-size:18px; display:block; margin-bottom:15px; color:#e74c3c;">⚠️ 必须登录后才能开启学习挑战！</span><button onclick="window.location.href=\'/wp-login.php\'" style="padding:10px 25px; border-radius:8px; border:none; background:linear-gradient(135deg, #e74c3c, #c0392b); color:#fff; font-weight:bold; cursor:pointer; font-size:16px; box-shadow: 0 4px 10px rgba(231,76,60,0.3);">立即登录</button>';
+                            return;
+                        }
+
+                        var isValidData = false;
+                        if (json) {
+                            if (json.success) {
+                                if (json.data) {
+                                    if (json.data.length > 0) { isValidData = true; }
+                                }
+                            }
+                        }
+
+                        if (isValidData) {
+                            wordList = json.data;
+                            loading.style.display = 'none';
+                            document.getElementById('main-btn-group').style.display = 'flex';
+                            document.getElementById('btn-shuffle-wrap').style.display = 'block';
+                            initGame();
+                        } else {
+                            var msg = "🍵 休息一下吧！该词库暂无此类任务。";
+                            if (mode === 'mistake') { msg = "✅ 完美！目前没有错题待复习！"; }
+                            loading.innerText = msg;
+                            setTimeout(function () {
+                                loading.style.display = 'none';
+                                document.getElementById('main-btn-group').style.display = 'flex';
+                            }, 3000);
+                        }
+                    })
+                    .catch(function (error) {
+                        loading.innerText = "网络请求被拦截，请尝试关闭广告拦截器或刷新重试。";
+                        setTimeout(function () {
+                            loading.style.display = 'none';
+                            document.getElementById('main-btn-group').style.display = 'flex';
+                        }, 3000);
+                    });
+            }
+
+            // 🟢 记录错题，补全 is_correct 参数
+            function reportProgress(wordId, rating) {
+                var fd = new FormData();
+                fd.append('action', 'save_word_progress_v5');
+                fd.append('word_id', wordId);
+                fd.append('rating', rating);
+
+                var isCor = 0;
+                if (rating > 1) { isCor = 1; }
+                fd.append('is_correct', isCor);
+
+                safeFetch('/wp-admin/admin-ajax.php', fd).catch(function (e) { console.log("保存进度出错"); });
+            }
+
+            function initGame() {
+                matchedCount = 0; cards = [];
+                firstCard = null; secondCard = null; lockBoard = false;
+                failedWordIds = {};
+
+                timerInterval = setInterval(function () {
+                    seconds++; document.getElementById('val-timer').innerText = seconds + "s";
+                }, 1000);
+
+                for (var i = 0; i < wordList.length; i++) {
+                    var item = wordList[i];
+                    cards.push({ text: item.word, fullText: item.word, type: 'en', data: item, matched: false });
+
+                    var pureCn = "无释义";
+                    if (item.meaning) {
+                        var safeWord = escapeRegExp(item.word);
+                        var c1 = item.meaning.replace(/<[^>]+>/g, ' ');
+                        var c2 = c1.replace(/\[.*?\]|\/.*?\//g, '');
+                        var c3 = c2.replace(new RegExp(safeWord, 'gi'), '');
+                        var c4 = c3.replace(/[\r\n]+/g, ', ').replace(/\s+/g, ' ');
+                        var finalCn = c4.replace(/,(\s*,)+/g, ',').replace(/^[, ]+|[, ]+$/g, '');
+                        if (finalCn) { pureCn = finalCn; }
+                    }
+
+                    var displayCn = pureCn;
+                    if (pureCn.length > 18) {
+                        displayCn = pureCn.substring(0, 16) + '..';
+                    }
+                    cards.push({ text: displayCn, fullText: pureCn, type: 'cn', data: item, matched: false });
+                }
+
+                cards.sort(function () { return 0.5 - Math.random(); });
+
+                for (var j = 0; j < cards.length; j++) {
+                    var card = cards[j];
+                    var bubble = document.createElement('div');
+                    var typeClass = 'card-cn';
+                    if (card.type === 'en') { typeClass = 'card-en'; }
+                    bubble.className = 'bubble ' + typeClass;
+
+                    bubble.innerHTML = '<span class="bubble-text">' + card.text + '</span>';
+                    bubble.dataset.fulltext = card.fullText;
+                    bubble.dataset.wordInfo = JSON.stringify(card.data);
+
+                    bindTouchEvents(bubble, card);
+                    board.appendChild(bubble);
+                }
+            }
+
+            function bindTouchEvents(el, card) {
+                var pressTimer; var isLongPress = false;
+
+                el.addEventListener('touchstart', function (e) {
+                    isLongPress = false;
+                    var self = this;
+                    pressTimer = setTimeout(function () {
+                        isLongPress = true;
+                        self.classList.add('mobile-show-tip');
+                    }, 500);
+                }, { passive: true });
+
+                el.addEventListener('touchmove', function (e) {
+                    clearTimeout(pressTimer);
+                    this.classList.remove('mobile-show-tip');
+                }, { passive: true });
+
+                el.addEventListener('touchend', function (e) {
+                    clearTimeout(pressTimer);
+                    var self = this;
+                    if (isLongPress) {
+                        e.preventDefault();
+                        setTimeout(function () { self.classList.remove('mobile-show-tip'); }, 300);
+                    } else {
+                        handleCardClick(this, card);
+                    }
+                });
+
+                el.addEventListener('click', function (e) {
+                    if (!isLongPress) { handleCardClick(this, card); }
+                });
+            }
+
+            function handleCardClick(el, card) {
+                if (lockBoard) { return; }
+                if (el.classList.contains('selected')) { return; }
+
+                // 🟢 点击卡片时的智能播放
+                if (card.type === 'en') {
+                    stopAllAudio();
+                    var hasCardAudio = false;
+                    if (card.data.audio) {
+                        if (card.data.audio !== '') { hasCardAudio = true; }
+                    }
+
+                    if (hasCardAudio) {
+                        gameAudio.src = card.data.audio;
+                        gameAudio.currentTime = 0;
+                        gameAudio.onerror = function () { fallbackToAIVoice(card.data.word); };
+                        gameAudio.play().catch(function (e) { fallbackToAIVoice(card.data.word); });
+                    } else {
+                        fallbackToAIVoice(card.data.word);
+                    }
+                }
+
+                if (firstCard) {
+                    if (firstCard.card.type === card.type) {
+                        var msg = "请选择英文单词";
+                        if (card.type === 'en') { msg = "请选择中文含义"; }
+                        showToast('⚠️ 同类型无效，' + msg);
+                        return;
+                    }
+                }
+
+                el.classList.add('selected');
+                if (!firstCard) {
+                    firstCard = { el: el, card: card };
+                    return;
+                }
+
+                secondCard = { el: el, card: card };
+                checkForMatch();
+            }
+
+            function checkForMatch() {
+                var data1 = JSON.parse(firstCard.el.dataset.wordInfo);
+                var data2 = JSON.parse(secondCard.el.dataset.wordInfo);
+
+                if (data1.id === data2.id) {
+                    combo++;
+                    score += 10 * combo;
+                    document.getElementById('val-score').innerText = score;
+                    document.getElementById('val-combo').innerText = combo;
+
+                    if (!failedWordIds[data1.id]) { reportProgress(data1.id, 3); }
+
+                    firstCard.el.classList.add('match-anim');
+                    secondCard.el.classList.add('match-anim');
+
+                    // 🟢 匹配成功时的智能播放
+                    setTimeout(function () {
+                        stopAllAudio();
+                        var hasMatchAudio = false;
+                        if (data1.audio) {
+                            if (data1.audio !== '') { hasMatchAudio = true; }
+                        }
+                        if (hasMatchAudio) {
+                            gameAudio.src = data1.audio;
+                            gameAudio.currentTime = 0;
+                            gameAudio.onerror = function () { fallbackToAIVoice(data1.word); };
+                            gameAudio.play().catch(function (e) { fallbackToAIVoice(data1.word); });
+                        } else {
+                            fallbackToAIVoice(data1.word);
+                        }
+                    }, 300);
+
+                    disableCards();
+                } else {
+                    combo = 0; document.getElementById('val-combo').innerText = combo;
+
+                    failedWordIds[data1.id] = true;
+                    failedWordIds[data2.id] = true;
+                    reportProgress(data1.id, 1);
+
+                    lockBoard = true;
+                    firstCard.el.classList.add('wrong-anim');
+                    secondCard.el.classList.add('wrong-anim');
+
+                    setTimeout(function () {
+                        firstCard.el.classList.remove('selected', 'wrong-anim');
+                        secondCard.el.classList.remove('selected', 'wrong-anim');
+                        showPunishmentModal(data1);
+                        resetBoard();
+                    }, 500);
+                }
+            }
+
+            function disableCards() {
+                lockBoard = true;
+                setTimeout(function () {
+                    firstCard.el.classList.add('hidden');
+                    secondCard.el.classList.add('hidden');
+                    resetBoard();
+                    matchedCount += 2;
+                    if (matchedCount === wordList.length * 2) {
+                        clearInterval(timerInterval);
+                        document.getElementById('btn-shuffle-wrap').style.display = 'none';
+                        alert("🎉 完美！得分: " + score + "！所有数据已同步至记忆库！");
+                    }
+                }, 400);
+            }
+
+            function resetBoard() {
+                if (firstCard) { firstCard.el.classList.remove('selected'); }
+                if (secondCard) { secondCard.el.classList.remove('selected'); }
+                firstCard = null; secondCard = null; lockBoard = false;
+            }
+
+            function showPunishmentModal(wordData) {
+                lockBoard = true; currentErrorWordData = wordData;
+
+                var phoneticStr = '[无音标]';
+                if (wordData.phonetic) { phoneticStr = wordData.phonetic; }
+
+                // 🟢 用 innerHTML 正确渲染带有 HTML 标签的音标
+                document.getElementById('m-front-phonetic').innerHTML = phoneticStr;
+                document.getElementById('m-back-phonetic').innerHTML = phoneticStr;
+                document.getElementById('m-word').innerText = wordData.word;
+
+                if (wordData.meaning) {
+                    document.getElementById('m-meaning').innerHTML = wordData.meaning;
+                } else {
+                    document.getElementById('m-meaning').innerHTML = '暂无释义';
+                }
+
+                // 🟢 高清双图渲染
+                var imgContainer = document.getElementById('m-word-img-container');
+                var imgHtml = '';
+                if (wordData.img1) {
+                    if (wordData.img1 !== '') {
+                        imgHtml += '<img decoding="async" src="' + wordData.img1 + '" style="width:100%; display:block; margin:0 auto 15px auto; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">';
+                    }
+                }
+                if (wordData.img2) {
+                    if (wordData.img2 !== '') {
+                        imgHtml += '<img decoding="async" src="' + wordData.img2 + '" style="width:100%; display:block; margin:0 auto 15px auto; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">';
+                    }
+                }
+                if (imgHtml !== '') {
+                    imgContainer.innerHTML = imgHtml;
+                    imgContainer.style.display = 'block';
+                } else {
+                    imgContainer.style.display = 'none';
+                }
+
+                // 🟢 英文释义 + 发音按钮
+                if (wordData.en_meaning) {
+                    if (wordData.en_meaning.trim() !== '') {
+                        var enHtml = wordData.en_meaning;
+                        if (wordData.en_audio) {
+                            if (wordData.en_audio !== '') {
+                                mEnAudio.src = wordData.en_audio;
+                                var speakerBtn = ' <span style="cursor:pointer; font-size:18px; vertical-align:middle; margin-left:8px;" onclick="playModalEnAudio()">🔊</span>';
+                                enHtml += speakerBtn;
+                            }
+                        }
+                        document.getElementById('m-en-meaning').innerHTML = enHtml;
+                        document.getElementById('m-en-meaning-block').style.display = 'block';
+                    } else { document.getElementById('m-en-meaning-block').style.display = 'none'; }
+                } else { document.getElementById('m-en-meaning-block').style.display = 'none'; }
+
+                if (wordData.memory) {
+                    if (wordData.memory.trim() !== '') {
+                        document.getElementById('m-memory').innerHTML = wordData.memory;
+                        document.getElementById('m-memory-block').style.display = 'block';
+                    } else { document.getElementById('m-memory-block').style.display = 'none'; }
+                } else { document.getElementById('m-memory-block').style.display = 'none'; }
+
+                if (wordData.example) {
+                    if (wordData.example.trim() !== '') {
+                        var exHtml = wordData.example;
+                        if (wordData.example_audio) {
+                            if (wordData.example_audio !== '') {
+                                mExAudio.src = wordData.example_audio;
+                                var speakerBtnEx = ' <span style="cursor:pointer; font-size:18px; vertical-align:middle; margin-left:8px;" onclick="playModalExAudio()">🔊</span>';
+                                exHtml += speakerBtnEx;
+                            }
+                        }
+                        document.getElementById('m-example').innerHTML = exHtml;
+                        document.getElementById('m-example-block').style.display = 'block';
+                    } else { document.getElementById('m-example-block').style.display = 'none'; }
+                } else { document.getElementById('m-example-block').style.display = 'none'; }
+
+                // 🟢 弹窗智能播放
+                setTimeout(function () {
+                    var hasModalAudio = false;
+                    if (wordData.audio) {
+                        if (wordData.audio !== '') { hasModalAudio = true; }
+                    }
+
+                    if (hasModalAudio) {
+                        mAudio.src = wordData.audio;
+                        stopAllAudio();
+                        mAudio.onerror = function () { fallbackToAIVoice(wordData.word); };
+                        mAudio.play().catch(function (e) { fallbackToAIVoice(wordData.word); });
+                    } else {
+                        stopAllAudio();
+                        fallbackToAIVoice(wordData.word);
+                    }
+                }, 100);
+
+                mCardFront.style.display = 'block';
+                mCardBack.style.display = 'none';
+                mTypeWord.value = '';
+                mTypeWord.classList.remove('correct', 'error');
+                modal.classList.add('active');
+                setTimeout(function () { mTypeWord.focus(); }, 300);
+            }
+
+            document.getElementById('btn-show-answer').addEventListener('click', function () {
+                document.getElementById('m-card-front').style.display = 'none';
+                document.getElementById('m-card-back').style.display = 'block';
+                playModalWordAudio();
+            });
+
+            mTypeWord.addEventListener('input', function () {
+                if (!currentErrorWordData) return;
+                if (this.value.trim().toLowerCase() === currentErrorWordData.word.toLowerCase()) {
+                    this.classList.add('correct');
+                    setTimeout(function () {
+                        document.getElementById('m-card-front').style.display = 'none';
+                        document.getElementById('m-card-back').style.display = 'block';
+                        playModalWordAudio();
+                    }, 400);
+                }
+            });
+
+            mTypeWord.addEventListener('keypress', function (e) {
+                if (!currentErrorWordData) return;
+                if (e.key === 'Enter') {
+                    if (this.value.trim().toLowerCase() !== currentErrorWordData.word.toLowerCase()) {
+                        this.classList.add('error');
+                        var self = this;
+                        setTimeout(function () { self.classList.remove('error'); }, 400);
+                    }
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (modal.classList.contains('active')) {
+                    if (document.getElementById('m-card-back').style.display === 'block') {
+                        var code = e.code;
+                        if (code === 'Space') { submitAnki(null); }
+                    }
+                }
+            });
+
+            window.submitAnki = function (rate) {
+                if (rate !== null) { reportProgress(currentErrorWordData.id, rate); }
+                modal.classList.remove('active');
+                stopAllAudio();
+                if (firstCard) { firstCard.el.classList.remove('selected', 'wrong-anim'); }
+                if (secondCard) { secondCard.el.classList.remove('selected', 'wrong-anim'); }
+                firstCard = null; secondCard = null; lockBoard = false;
+            }
+        })();
+    </script>
+</body>
+
+</html>
