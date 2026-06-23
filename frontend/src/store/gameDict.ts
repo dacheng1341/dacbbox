@@ -12,6 +12,8 @@ export interface Word {
   phonetic0?: string;
   phonetic1?: string;
   trans: WordTrans[];
+  memory?: string;
+  etymology?: string;
 }
 
 export interface WordProgress {
@@ -32,8 +34,8 @@ export interface GameDictState {
 
 // 预定义词库列表
 export const DICT_LIST = [
-  { id: 'ielts', name: '雅思词库', url: '/data/ielts.json' },
-  { id: '4000_core', name: '4000核心词汇', url: '/data/4000_core.json' }
+  { id: 'IELTS_order', name: '雅思词库', url: 'https://qiaoqiao-assets.dacbbox.com/dicts/en/word/IELTS_order.json' },
+  { id: '4000_Essential_English_Words-sentence', name: '4000核心词汇', url: 'https://qiaoqiao-assets.dacbbox.com/dicts/en/word/4000_Essential_English_Words-sentence.json' }
 ];
 
 export const useDictStore = defineStore('gameDict', () => {
@@ -56,14 +58,11 @@ export const useDictStore = defineStore('gameDict', () => {
     words.splice(0, words.length);
 
     const dictInfo = DICT_LIST.find(d => d.id === dictId);
-    if (!dictInfo) {
-      console.error('Unknown dict id:', dictId);
-      return;
-    }
+    let fetchUrl = dictInfo ? dictInfo.url : `https://qiaoqiao-assets.dacbbox.com/dicts/en/word/${dictId}.json`;
 
     try {
-      // 从 CDN/静态目录 加载词典完整 JSON
-      const res = await fetch(dictInfo.url);
+      // 从 CDN 加载词典完整 JSON
+      const res = await fetch(fetchUrl);
       const data: Word[] = await res.json();
       words.push(...data); // 浅层代理，不卡顿
 
