@@ -32,13 +32,18 @@ export interface GameDictState {
   statistics: any[];
 }
 
-// 预定义词库列表
-export const DICT_LIST = [
-  { id: 'IELTS_order', name: '雅思词库', url: 'https://qiaoqiao-assets.dacbbox.com/dicts/en/word/IELTS_order.json' },
-  { id: '4000_Essential_English_Words-sentence', name: '4000核心词汇', url: 'https://qiaoqiao-assets.dacbbox.com/dicts/en/word/4000_Essential_English_Words-sentence.json' }
-];
+export interface DictMeta {
+  id: string;
+  name: string;
+  description?: string;
+  category: string;
+  tags?: string[];
+  url: string;
+  length?: number;
+}
 
 export const useDictStore = defineStore('gameDict', () => {
+  const dictList = ref<DictMeta[]>([]);
   const currentDictId = ref<string>('');
   const words = shallowReactive<Word[]>([]);
   const progress = ref<Record<string, WordProgress>>({});
@@ -46,6 +51,18 @@ export const useDictStore = defineStore('gameDict', () => {
   const statistics = ref<any[]>([]);
 
   const isLoaded = ref(false);
+
+  // 初始化加载词库列表
+  async function fetchDictList() {
+    if (dictList.value.length > 0) return;
+    try {
+      const res = await fetch('/data/dict_list.json');
+      const data: DictMeta[] = await res.json();
+      dictList.value = data;
+    } catch (e) {
+      console.error('Failed to load dict list', e);
+    }
+  }
 
   // 动态切换与加载字典
   async function loadDict(dictId: string) {
@@ -57,8 +74,8 @@ export const useDictStore = defineStore('gameDict', () => {
     // 清理内存
     words.splice(0, words.length);
 
-    const dictInfo = DICT_LIST.find(d => d.id === dictId);
-    let fetchUrl = dictInfo ? dictInfo.url : `https://qiaoqiao-assets.dacbbox.com/dicts/en/word/${dictId}.json`;
+    const dictInfo = dictList.value.find(d => d.id === dictId);
+    let fetchUrl = dictInfo ? `https://qiaoqiao-assets.dacbbox.com/dicts/en/word/${dictInfo.url}` : `https://qiaoqiao-assets.dacbbox.com/dicts/en/word/${dictId}.json`;
 
     try {
       // 从 CDN 加载词典完整 JSON
@@ -114,12 +131,14 @@ export const useDictStore = defineStore('gameDict', () => {
   }
 
   return {
+    dictList,
     currentDictId,
     words,
     progress,
     lastLearnIndex,
     statistics,
     isLoaded,
+    fetchDictList,
     loadDict,
     saveProgress,
     recordWord,
